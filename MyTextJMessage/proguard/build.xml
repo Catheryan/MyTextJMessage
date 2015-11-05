@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    name="jmessage-sdk-demo"
+    default="help" >
+
+    <loadproperties srcFile="../../local.properties" />
+
+    <property name="dist.dir" value="${project.dir}/dist" />
+    <property name="libs.dir" value="${demo.dir}/libs" />
+    <property name="main.dir" value="${demo.dir}/src/main" />
+    <property name="so.dir" value="${main.dir}/jniLibs" />
+
+    <property name="sdk-zip-name" value="${zip-name}-${version-name}.zip" />
+    <property name="build.res" value="${project.dir}/build-res/jmessage-sdk-android" />
+
+    <target name="ant-sdk-zip" depends="copyApk">
+
+        <delete dir="${build.res}/demo" /><!-- 删除上次的demo目录 -->
+        <delete dir="${build.res}/libs" /><!-- 删除 -->
+        <delete dir="${build.res}/${sdk-zip-name}" /><!-- 删除上次的zip文件-->
+
+        <!--将JPushIMdemo拷贝到build-res中 -->
+        <copy todir="${build.res}/demo/" >
+            <fileset
+                dir="${project.dir}"
+                includes="**" />
+        </copy>
+
+        <!-- 删除buidl-res的JPushIMdemo中无用的文件 -->
+        <delete file="${build.res}/demo/local.properties" />
+        <delete file="${build.res}/demo/local.properties.default" />
+        <delete dir="${build.res}/demo/build" />
+        <delete dir="${build.res}/demo/JMessageDemo/build" />
+        <delete dir="${build.res}/demo/dist" />
+        <delete dir="${build.res}/demo/JMessageDemo/proguard" />
+        <delete dir="${build.res}/demo/build-res" />
+        <delete dir="${build.res}/demo/JPushIMdemo" />
+
+        <!-- 将准备好的AndroidManifest 模板文件替换demo里面的AndroidManifest-->
+        <delete file="${build.res}/demo/JMessageDemo/src/main/AndroidManifest.xml" />
+        <copy
+            file="${build.res}/AndroidManifest.xml"
+            tofile="${build.res}/demo/JMessageDemo/src/main/AndroidManifest.xml" />
+
+        <!-- 将demo里libs下面的文件拷贝到build-res/libs下面-->
+        <copy todir="${build.res}/libs/" >
+            <fileset
+                dir="${build.res}/demo/JMessageDemo/libs"
+                includes="**" />
+        </copy>
+        <!-- 将demo里jniLibs下的so文件拷贝到build-res/libs下面-->
+        <copy todir="${build.res}/libs/" >
+            <fileset
+                dir="${build.res}/demo/JMessageDemo/src/main/jniLibs"
+                includes="**" />
+        </copy>
+
+        <!-- 删除上次的打包文件-->
+        <delete file="${build.res}/${sdk-zip-name}" />
+        <!--<delete>
+            <fileset dir="${build.res}" includes="**/JMessage-Android-SDK*.zip" />
+        </delete>-->
+
+        <!-- 替换掉build-res里demo中的 ant.importBuild "proguard/build.xml"-->
+        <replaceregexp file="${build.res}/demo/JMessageDemo/build.gradle"
+            match="ant.importBuild &quot;proguard/build.xml&quot;(.*)"
+            replace="\1"
+            byline="true"
+            />
+
+        <!-- 将build-res下的文件进行打包-->
+        <zip destfile="${dist.dir}/${sdk-zip-name}" >
+            <zipfileset
+                dir="${build.res}"
+                prefix="jmessage-sdk-android" />
+        </zip>
+
+        <!--<delete dir="${build.res}/example/" />-->
+    </target>
+
+</project>
